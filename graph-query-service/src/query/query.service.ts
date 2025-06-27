@@ -29,7 +29,7 @@ export class QueryService {
   private readonly endpoint =
     'https://api.studio.thegraph.com/query/112505/simple-registry/version/latest';
   private readonly headers = {
-    Authorization: `Bearer b75277218d17d5ddde884ce22f2ffda0`,
+    Authorization: `Bearer ${process.env.THE_GRAPH_TOKEN}`,
   };
 
   private async executeQuery<T>(
