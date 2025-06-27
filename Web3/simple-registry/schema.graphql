@@ -1,0 +1,28 @@
+type Registered @entity(immutable: true) {
+  id: Bytes!
+  user: Bytes! # address
+  internal_id: BigInt! # uint256
+  metadata: String! # string
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type Removed @entity(immutable: true) {
+  id: Bytes!
+  internal_id: BigInt! # uint256
+  executor: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type Updated @entity(immutable: true) {
+  id: Bytes!
+  internal_id: BigInt! # uint256
+  oldMeta: String! # string
+  newMeta: String! # string
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
