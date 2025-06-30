@@ -1,0 +1,17 @@
+# Ignore node_modules directory
+node_modules/
+
+# Ignore all log files
+*.log
+
+# Ignore test files
+test/
+
+# Ignore sensitive environment files
+.env
+
+# Ignore Dockerfile itself
+Dockerfile
+
+# Ignore hidden files and directories (e.g., .git)
+.*
