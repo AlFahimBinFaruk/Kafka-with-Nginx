@@ -11,3 +11,8 @@ http://localhost/graph-service/query/update-history/22
 ```shell
 http://localhost/graph-service/query/delete-history/11
 ```
+
+### Auth Backend query
+```shell
+http://localhost/auth-backend/api
+```
