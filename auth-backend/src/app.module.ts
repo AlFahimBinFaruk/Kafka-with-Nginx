@@ -5,6 +5,8 @@ import { AuthModule } from './auth/auth.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule,ConfigService } from '@nestjs/config';
+import { AuthVerificationModule } from './auth-verification/auth-verification.module';
+import { KafkaModule } from './kafka/kafka.module';
 
 
 @Module({
@@ -27,7 +29,9 @@ import { ConfigModule,ConfigService } from '@nestjs/config';
       inject: [ConfigService],
     }),    
     UserModule,
-    AuthModule
+    AuthModule,
+    AuthVerificationModule,
+    KafkaModule
   ],
   providers:[AppService],
   controllers:[AppController]

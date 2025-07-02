@@ -1,6 +1,7 @@
 // src/query/query.service.ts
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { gql, request } from 'graphql-request';
+import { AuthVerificationService } from '../auth-verification/auth-verification.service';
 
 // Define TypeScript interfaces for the data types
 export interface Registered {
@@ -25,6 +26,10 @@ export interface Updated {
 
 @Injectable()
 export class QueryService {
+  constructor(
+    private readonly authVerificationService: AuthVerificationService,
+  ) {}
+
   private readonly logger = new Logger(QueryService.name);
   private readonly endpoint =
     'https://api.studio.thegraph.com/query/112505/simple-registry/version/latest';
@@ -44,7 +49,28 @@ export class QueryService {
     }
   }
 
-  async getRegistereds(limit): Promise<Registered[]> {
+  private async validateHeader(authHeader): Promise<boolean> {
+    const jwt = authHeader?.split(' ')[1];
+    if (!jwt) {
+      return false;
+    }
+
+    try {
+      const isValid = await this.authVerificationService.verifyToken(jwt);
+      if (!isValid) {
+        return false;
+      }
+    } catch (err) {
+      return false;
+    }
+    return true;
+  }
+
+  async getRegistereds(authHeader, limit): Promise<Registered[]> {
+    const validation = await this.validateHeader(authHeader);
+    if (!validation) {
+      throw new UnauthorizedException('Validation failed!');
+    }
     const query = gql`
       query GetRegistereds($first: Int!) {
         registereds(first: $first) {
@@ -60,7 +86,11 @@ export class QueryService {
     });
     return data.registereds;
   }
-  async getRemoveds(limit): Promise<Removed[]> {
+  async getRemoveds(authHeader, limit): Promise<Removed[]> {
+    const validation = await this.validateHeader(authHeader);
+    if (!validation) {
+      throw new UnauthorizedException('Validation failed!');
+    }
     const query = gql`
       query GetRemoveds($first: Int!) {
         removeds(first: $first) {
@@ -76,7 +106,11 @@ export class QueryService {
     return data.removeds;
   }
 
-  async getUpdateds(limit): Promise<Updated[]> {
+  async getUpdateds(authHeader, limit): Promise<Updated[]> {
+    const validation = await this.validateHeader(authHeader);
+    if (!validation) {
+      throw new UnauthorizedException('Validation failed!');
+    }
     const query = gql`
       query GetUpdateds($first: Int!) {
         updateds(first: $first) {

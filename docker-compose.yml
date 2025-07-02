@@ -10,8 +10,6 @@ services:
       - postgres
     env_file:
       - ./auth-backend/.env
-    volumes:
-      - ./auth-backend:/app
     networks:
       - app-network
 

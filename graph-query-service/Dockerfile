@@ -1,30 +1,31 @@
 # ---------- BASE STAGE ----------
-FROM node:22-slim AS base
+FROM node:22-slim AS deps
 WORKDIR /app
-COPY package.json yarn.lock ./
 
-# Install dependencies (only needed packages)
-RUN yarn install
+# Install dependencies only
+COPY package.json yarn.lock ./
+RUN yarn install --production --frozen-lockfile
 
 # ---------- BUILD STAGE ----------
-FROM node:22-slim AS build
+FROM node:22-slim AS builder
 WORKDIR /app
-COPY . .
-COPY --from=base /app/node_modules ./node_modules
 
-# Compile NestJS TypeScript to JavaScript
+# Copy source and install dev deps for build only
+COPY package.json yarn.lock ./
+RUN yarn install --frozen-lockfile
+
+COPY . .
 RUN yarn build
 
 # ---------- FINAL STAGE ----------
-FROM node:22-slim AS final
+FROM node:22-slim AS runner
 WORKDIR /app
 
-# Copy only necessary files from build
-COPY --from=base /app/node_modules ./node_modules
-COPY --from=build /app/dist ./dist
+# Minimal runtime only: no dev deps, no source, no .ts files
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=builder /app/dist ./dist
 COPY package.json ./
 
 EXPOSE 5000
 
-# Start app
 CMD ["node", "dist/main"]

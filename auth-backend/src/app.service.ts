@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
-export class AppService {
+export class AppService  {
   getHello(): any {
-    return {msg:'Server Running!'};
+    return {msg:'Server Running!!'};
   }
 }

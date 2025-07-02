@@ -25,9 +25,6 @@ RUN npm run build
 # ---------- FINAL RUNTIME IMAGE ----------
 FROM node:22-slim AS final
 
-# Use a non-root user for security
-RUN useradd --user-group --create-home --shell /bin/false appuser
-
 WORKDIR /app
 
 # Only copy what's needed at runtime

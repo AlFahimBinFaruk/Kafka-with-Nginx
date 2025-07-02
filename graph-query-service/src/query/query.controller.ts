@@ -1,4 +1,4 @@
-import { Controller, Get, Param } from "@nestjs/common";
+import { Controller, Get, Param,Headers } from "@nestjs/common";
 import { QueryService } from "./query.service";
 
 @Controller("query")
@@ -7,16 +7,16 @@ export class QueryController{
         private queryService:QueryService
     ){}
     @Get("register-history/:limit")
-    getRegisterHistory(@Param("limit") limit:string){
-        return this.queryService.getRegistereds(Number(limit))
+    getRegisterHistory(@Headers('authorization') authHeader: string,@Param("limit") limit:string){
+        return this.queryService.getRegistereds(authHeader,Number(limit))
     }
     @Get("update-history/:limit")
-    getUpdateHistory(@Param("limit") limit:string){
+    getUpdateHistory(@Headers('authorization') authHeader: string,@Param("limit") limit:string){
         // return {msg:`ok ${limit}`}
-        return this.queryService.getUpdateds(Number(limit))
+        return this.queryService.getUpdateds(authHeader,Number(limit))
     }
     @Get("delete-history/:limit")
-    getDeleteHistory(@Param("limit") limit:string){
-        return this.queryService.getRemoveds(Number(limit))
+    getDeleteHistory(@Headers('authorization') authHeader: string,@Param("limit") limit:string){
+        return this.queryService.getRemoveds(authHeader,Number(limit))
     }
 }
