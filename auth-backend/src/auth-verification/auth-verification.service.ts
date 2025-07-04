@@ -10,13 +10,13 @@ export class AuthVerificationService implements OnModuleInit {
     private readonly kafkaService: KafkaService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
-    private userService:UserService
+    private userService: UserService,
   ) {}
 
   async onModuleInit() {
     // console.log("Auth backend init module")
     await this.kafkaService.consume(
-      'auth.token.verify.request',
+      process.env.KAFKA_VERIFY_REQUEST || 'auth.token.verify.request',
       this.handleTokenRequest.bind(this),
     );
   }
@@ -32,15 +32,14 @@ export class AuthVerificationService implements OnModuleInit {
       const userDetails = await this.userService.findById(userId);
       // console.log("user id => ",userId," ","Details => ",userDetails)
       if (userDetails) {
-        result=true;
+        result = true;
       }
-      
     } catch (e) {
       result = false;
     }
 
     await this.kafkaService.send(
-      'auth.token.verify.response',
+      process.env.KAFKA_VERIFY_RESPONSE || 'auth.token.verify.response',
       { reqId, result },
       reqId,
     );

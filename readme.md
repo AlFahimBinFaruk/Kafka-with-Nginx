@@ -1,3 +1,10 @@
+### How to run it
+```shell
+docker compose up --build
+```
+then query the following endpoints to see if everyting is working as expected.
+
+
 ### Graph Query
 1. Register History
 ```shell

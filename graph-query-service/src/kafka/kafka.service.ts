@@ -10,12 +10,18 @@ export class KafkaService implements OnModuleInit, OnModuleDestroy {
 
   constructor() {
     this.kafka = new Kafka({
-      brokers: ['172.16.208.74:9092'],
-      clientId: 'graph-query-service',
+      brokers: [process.env.KAFKA_BROKER || 'kafka:9092'],
+      clientId: process.env.KAFKA_CLIENTID || 'graph-query-service',
+      retry: {
+        initialRetryTime: 3000, // 3 seconds between retries
+        retries: 10, // try up to 10 times
+      },
     });
 
     this.producer = this.kafka.producer();
-    this.consumer = this.kafka.consumer({ groupId: 'graph-query-group' });
+    this.consumer = this.kafka.consumer({
+      groupId: process.env.KAFKA_GROUPID || 'graph-query-group',
+    });
     this.admin = this.kafka.admin();
   }
 
@@ -23,12 +29,14 @@ export class KafkaService implements OnModuleInit, OnModuleDestroy {
     await this.admin.createTopics({
       topics: [
         {
-          topic: 'auth.token.verify.request',
+          topic:
+            process.env.KAFKA_VERIFY_REQUEST || 'auth.token.verify.request',
           numPartitions: 3,
           replicationFactor: 1,
         },
         {
-          topic: 'auth.token.verify.response',
+          topic:
+            process.env.KAFKA_VERIFY_RESPONSE || 'auth.token.verify.response',
           numPartitions: 3,
           replicationFactor: 1,
         },

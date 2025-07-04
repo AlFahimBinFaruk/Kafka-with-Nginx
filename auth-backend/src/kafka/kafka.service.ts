@@ -10,12 +10,18 @@ export class KafkaService implements OnModuleInit {
 
   constructor() {
     this.kafka = new Kafka({
-      clientId: 'auth-backend',
-      brokers: ['172.16.208.74:9092'],
+      clientId: process.env.KAFKA_CLIENTID,
+      brokers: [process.env.KAFKA_BROKER || 'kafka:9092'],
+      retry: {
+        initialRetryTime: 3000, // 3 seconds between retries
+        retries: 10, // try up to 10 times
+      },
     });
 
     this.producer = this.kafka.producer();
-    this.consumer = this.kafka.consumer({ groupId: 'auth-group' });
+    this.consumer = this.kafka.consumer({
+      groupId: process.env.KAFKA_GROUPID || 'auth-group',
+    });
     this.admin = this.kafka.admin();
   }
 
@@ -23,12 +29,14 @@ export class KafkaService implements OnModuleInit {
     await this.admin.createTopics({
       topics: [
         {
-          topic: 'auth.token.verify.request',
+          topic:
+            process.env.KAFKA_VERIFY_REQUEST || 'auth.token.verify.request',
           numPartitions: 3,
           replicationFactor: 1,
         },
         {
-          topic: 'auth.token.verify.response',
+          topic:
+            process.env.KAFKA_VERIFY_RESPONSE || 'auth.token.verify.response',
           numPartitions: 3,
           replicationFactor: 1,
         },
@@ -63,11 +71,11 @@ export class KafkaService implements OnModuleInit {
     await this.consumer.run({
       eachMessage: async ({ message }) => {
         // console.log(`[Kafka] Message received on topic: ${topic}`);
-        const payload = message.value?.toString()
-        if(payload){
-            await handler(JSON.parse(payload));
-        }else{
-          console.log("Auth backend payload is empty.")
+        const payload = message.value?.toString();
+        if (payload) {
+          await handler(JSON.parse(payload));
+        } else {
+          console.log('Auth backend payload is empty.');
         }
       },
     });

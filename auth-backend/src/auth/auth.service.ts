@@ -7,30 +7,45 @@ import { LoginDto } from './dto/login.dto';
 
 @Injectable()
 export class AuthService {
-    constructor(
-        private userService:UserService,
-        private jwtService:JwtService
-    ){}
+  constructor(
+    private userService: UserService,
+    private jwtService: JwtService,
+  ) {}
 
-    async register(dto:RegisterDto){
-        const hashedPassword = await bcrypt.hash(dto.password,10);
-        await this.userService.create({
-            username:dto.username,
-            email:dto.email,
-            password:hashedPassword
-        });
+  async register(dto: RegisterDto) {
+    try {
+      const hashedPassword = await bcrypt.hash(dto.password, 10);
+      await this.userService.create({
+        username: dto.username,
+        email: dto.email,
+        password: hashedPassword,
+      });
 
-        return {message:"User registered successfully."};
+      return { message: 'User registered successfully.' };
+    } catch (error) {
+      console.log(
+        'XXXX ==> Auth backend -> auth service -> register error: ',
+        error,
+      );
+      return { message: 'Some error occured!!' };
     }
+  }
 
-    async login(dto:LoginDto){
-        const user=await this.userService.findByEmail(dto.email);
-        // console.log("User data=> ",user);
-        if(!user ||(!await bcrypt.compare(dto.password,user.password))){
-            throw new UnauthorizedException("Invalid creds.");
-        }
-        const payload={sub:user.id,role:user.role};
-        const token=await this.jwtService.signAsync(payload);
-        return {access_token:token};
+  async login(dto: LoginDto) {
+    try {
+      const user = await this.userService.findByEmail(dto.email);
+      if (!user || !(await bcrypt.compare(dto.password, user.password))) {
+        throw new UnauthorizedException('Invalid creds.');
+      }
+      const payload = { sub: user.id, role: user.role };
+      const token = await this.jwtService.signAsync(payload);
+      return { access_token: token };
+    } catch (error) {
+      console.log(
+        'XXXX ==> Auth backend -> auth service -> register error: ',
+        error,
+      );
+      return { message: 'Some error occured!!' };
     }
+  }
 }

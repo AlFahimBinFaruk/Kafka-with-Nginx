@@ -9,15 +9,18 @@ export class AuthVerificationService implements OnModuleInit {
   constructor(private readonly kafkaService: KafkaService) {}
 
   async onModuleInit() {
-    await this.kafkaService.consume('auth.token.verify.response', async (msg) => {
-      const { reqId, result } = msg;
-      console.log(`Processing response for ${reqId}`);
-      const resolver = this.pendingRequests.get(reqId);
-      if (resolver) {
-        resolver(result);
-        this.pendingRequests.delete(reqId);
-      }
-    });
+    await this.kafkaService.consume(
+      process.env.KAFKA_VERIFY_RESPONSE || 'auth.token.verify.response',
+      async (msg) => {
+        const { reqId, result } = msg;
+        console.log(`Processing response for ${reqId}`);
+        const resolver = this.pendingRequests.get(reqId);
+        if (resolver) {
+          resolver(result);
+          this.pendingRequests.delete(reqId);
+        }
+      },
+    );
   }
 
   async verifyToken(jwt: string): Promise<boolean> {
@@ -28,7 +31,10 @@ export class AuthVerificationService implements OnModuleInit {
       reqId,
     };
 
-    await this.kafkaService.send('auth.token.verify.request', payload);
+    await this.kafkaService.send(
+      process.env.KAFKA_VERIFY_REQUEST || 'auth.token.verify.request',
+      payload,
+    );
     return new Promise((resolve, reject) => {
       this.pendingRequests.set(reqId, resolve);
       // console.log("Sending req.....")

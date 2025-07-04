@@ -8,6 +8,7 @@ services:
       - '3000'
     depends_on:
       - postgres
+      - kafka
     env_file:
       - ./auth-backend/.env
     networks:
@@ -33,6 +34,8 @@ services:
     container_name: graph-query-service
     expose:
       - '5000'
+    depends_on:
+      - kafka
     env_file:
       - ./graph-query-service/.env
     networks:
@@ -49,6 +52,22 @@ services:
     depends_on:
       - auth-backend
       - graph-query-service
+    networks:
+      - app-network
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    container_name: kafka
+    ports:
+      - '9092:9092'
+    environment:
+      CLUSTER_ID: abcd1234ef567890abcd1234ef567890
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_NODE_ID: 1
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
     networks:
       - app-network
 
